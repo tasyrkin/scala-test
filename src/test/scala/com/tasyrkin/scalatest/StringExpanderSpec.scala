@@ -62,6 +62,7 @@ class StringExpanderSpec extends FlatSpec with Matchers {
   }
 
   "A number string" should "be expanded into correct string" in {
+    StringExpander.expand("-999999999999999999999") should be ("minus nine hundreds ninety nine quintillions nine hundreds ninety nine quadrillions nine hundreds ninety nine trillions nine hundreds ninety nine milliards nine hundreds ninety nine millions nine hundreds ninety nine thousands nine hundreds ninety nine")
     StringExpander.expand("-9125005") should be ("minus nine millions one hundred twenty five thousands five")
     StringExpander.expand("-5005") should be ("minus five thousands five")
     StringExpander.expand("-200") should be ("minus two hundreds")
@@ -85,12 +86,24 @@ class StringExpanderSpec extends FlatSpec with Matchers {
     StringExpander.expand("1000000000000") should be ("one trillion")
     StringExpander.expand("5000000000001") should be ("five trillions one")
     StringExpander.expand("12345678910111213") should be ("twelve quadrillions three hundreds forty five trillions six hundreds seventy eight milliards nine hundreds ten millions one hundred eleven thousands two hundreds thirteen")
+    StringExpander.expand("999999999999999999999") should be ("nine hundreds ninety nine quintillions nine hundreds ninety nine quadrillions nine hundreds ninety nine trillions nine hundreds ninety nine milliards nine hundreds ninety nine millions nine hundreds ninety nine thousands nine hundreds ninety nine")
   }
 
-  it should "throw IllegalArgumentException an out of range number is provided" in {
+  it should "throw IllegalArgumentException when negative number is provided" in {
     a [IllegalArgumentException] should be thrownBy {
       StringExpander.parseTriple(-1)
+    }
+  }
+
+  it should "throw IllegalArgumentException when out of range number is provided" in {
+    a [IllegalArgumentException] should be thrownBy {
       StringExpander.parseTriple(1000)
+    }
+  }
+
+  it should "throw IllegalArgumentException when a number is out of range" in {
+    a [IllegalArgumentException] should be thrownBy {
+      StringExpander.expand("1000000000000000000000")
     }
   }
 }

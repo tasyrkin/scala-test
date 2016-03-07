@@ -20,6 +20,7 @@ object StringExpander {
 
   /**
     * Expands a number into words. For example, "123" will be expanded into "one hundred twenty three"
+    * The supported number range is [-10^21+1; 10^21-1]
     *
     * @param numberStr a positive or negative number, alpha characters are not allowed
     * @return a word representation of a numberStr
@@ -28,32 +29,38 @@ object StringExpander {
     val isNegativeNumber = numberStr startsWith dash
     val positiveNumberStr = if (isNegativeNumber) numberStr drop 1 else numberStr
 
-    if(!isAllDigits(positiveNumberStr)) {
-      throw new IllegalArgumentException(s"Not a number [$numberStr]")
+    if(!isValidNumber(positiveNumberStr)) {
+      throw new IllegalArgumentException(s"Invalid number [$numberStr]")
     } else {
       stringOrEmpty(minus + space, isNegativeNumber) + expandCategory(positiveNumberStr, 0)
     }
   }
 
+  private[scalatest] def isValidNumber(positiveNumberStr: String) = {
+    val maxCategoryIdx = positiveNumberStr.length / 3 + (if(positiveNumberStr.length % 3 != 0) 1 else 0) - 1
+
+    isAllDigits(positiveNumberStr) && maxCategoryIdx < numberCategoryToSting.length
+  }
+
   private[scalatest] def spaceOrEmpty(flag: Boolean) = stringOrEmpty(space, flag)
   private[scalatest] def stringOrEmpty(str: String, flag: Boolean) = if (flag) str else empty
 
-
-  private[scalatest] def expandCategory(str: String, category: Int): String = {
-    if (str.length == 0){
+  private[scalatest] def expandCategory(numberStr: String, category: Int): String = {
+    if (numberStr.length == 0){
       empty
     } else {
-      val currentInt = Integer.parseInt(str takeRight 3)
-      val rest = str dropRight 3
+      val currentInt = Integer.parseInt(numberStr takeRight 3)
+
       val categoryStr = numberCategoryToSting(category) + stringOrEmpty("s", category > 0 && currentInt > 1)
 
       val currentStr = currentInt match {
-        case i if i == 0 => if(str.length == 1) parseTriple(i) else empty
+        case i if i == 0 => if (numberStr.length == 1) parseTriple(i) else empty
         case i => parseTriple(i) + spaceOrEmpty(categoryStr.length > 0) + categoryStr
 
       }
 
-      val nextStr = expandCategory(rest, category + 1)
+      val restStr = numberStr dropRight 3
+      val nextStr = expandCategory(restStr, category + 1)
       val spaceBetween = spaceOrEmpty(nextStr.length > 0 && currentStr.length > 0)
 
       s"$nextStr$spaceBetween$currentStr"
