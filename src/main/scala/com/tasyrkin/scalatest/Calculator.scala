@@ -1,3 +1,5 @@
+package com.tasyrkin.scalatest
+
 
 class Calculator[A](brand: String) {
   def add(x: Int, y: Int) = x + y
