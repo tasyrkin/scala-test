@@ -9,4 +9,4 @@ Following the resources
 
 
 Run classes
-`sbt "run-main PatternMatchingTest Arg1"`
+`sbt "run-main com.tasyrkin.scalatest.PatternMatchingTest 100"`
