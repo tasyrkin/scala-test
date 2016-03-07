@@ -22,6 +22,7 @@ object CalculatorTest extends App {
       case Calculator("HP", "20b") => "scientific"
       case Calculator("Samsung", "1a") => "financial"
       case Calculator("Casio", "AB") => "simple"
+      //rebinding matching value with another name
       case c@Calculator(brand, model) => s"$c is of unknown type"
     }
   }
