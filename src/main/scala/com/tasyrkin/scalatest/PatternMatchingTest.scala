@@ -1,38 +1,62 @@
 package com.tasyrkin.scalatest
 
+import com.typesafe.scalalogging.Logger
+import org.slf4j.LoggerFactory
+
 
 object StringExpander {
 
+  private[scalatest] val minus = "minus"
+  private[scalatest] val hundred = "hundred"
+  private[scalatest] val dash = "-"
+  private[scalatest] val empty = ""
+  private[scalatest] val space = " "
   private[scalatest] val singleDigitToSting = Array("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine")
   private[scalatest] val teenDigitToSting = Array("ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen")
-  private[scalatest] val tensDigitToSting = Array("", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety")
-  private[scalatest] val numberCategoryToSting = Array("", "thousand", "million", "milliard", "trillion", "quadrillion", "quintillion")
+  private[scalatest] val tensDigitToSting = Array(empty, empty, "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety")
+  private[scalatest] val numberCategoryToSting = Array(empty, "thousand", "million", "milliard", "trillion", "quadrillion", "quintillion")
+
+  private[scalatest] val LOG = Logger(LoggerFactory.getLogger(StringExpander.getClass))
+
+  /**
+    * Expands a number into words. For example, "123" will be expanded into "one hundred twenty three"
+    *
+    * @param numberStr a positive or negative number, alpha characters are not allowed
+    * @return a word representation of a numberStr
+    */
+  def expand(numberStr: String): String = {
+    val isNegativeNumber = numberStr startsWith dash
+    val positiveNumberStr = if (isNegativeNumber) numberStr drop 1 else numberStr
+
+    if(!isAllDigits(positiveNumberStr)) {
+      throw new IllegalArgumentException(s"Not a number [$numberStr]")
+    } else {
+      stringOrEmpty(minus + space, isNegativeNumber) + expandCategory(positiveNumberStr, 0)
+    }
+  }
+
+  private[scalatest] def spaceOrEmpty(flag: Boolean) = stringOrEmpty(space, flag)
+  private[scalatest] def stringOrEmpty(str: String, flag: Boolean) = if (flag) str else empty
 
 
   private[scalatest] def expandCategory(str: String, category: Int): String = {
     if (str.length == 0){
-      ""
+      empty
     } else {
       val currentInt = Integer.parseInt(str takeRight 3)
       val rest = str dropRight 3
-      val categoryStr = numberCategoryToSting(category) + (if (category > 0 && currentInt > 1) "s" else "")
+      val categoryStr = numberCategoryToSting(category) + stringOrEmpty("s", category > 0 && currentInt > 1)
 
       val currentStr = currentInt match {
-        case i if i == 0 => if(str.length == 1) parseTriple(i) else ""
-        case i => parseTriple(i) + (if (categoryStr.length > 0) " " else "") + categoryStr
+        case i if i == 0 => if(str.length == 1) parseTriple(i) else empty
+        case i => parseTriple(i) + spaceOrEmpty(categoryStr.length > 0) + categoryStr
 
       }
-      val nextStr = expandCategory(rest, category + 1)
-      val spaceBetween = if(nextStr.length > 0 && currentStr.length > 0) " " else ""
-      s"$nextStr$spaceBetween$currentStr"
-    }
-  }
 
-  def expand(str: String): String = {
-    if(!isAllDigits(str)) {
-      throw new IllegalArgumentException(s"Not a number [$str]")
-    } else {
-      expandCategory(str, 0)
+      val nextStr = expandCategory(rest, category + 1)
+      val spaceBetween = spaceOrEmpty(nextStr.length > 0 && currentStr.length > 0)
+
+      s"$nextStr$spaceBetween$currentStr"
     }
   }
 
@@ -44,20 +68,22 @@ object StringExpander {
     } else {
       val hundreds = number / 100
       val hundredsStr = hundreds match {
-        case 0 => ""
-        case i => s"${singleDigitToSting(i)} hundred" + (if (hundreds > 1) "s" else "")
+        case 0 => empty
+        case i => s"${singleDigitToSting(i)} $hundred" + stringOrEmpty("s", hundreds > 1)
       }
       val tens = number % 100
       val tensStr = tens match {
-        case 0 if hundreds > 0 => ""
+        case 0 if hundreds > 0 => empty
         case i if i >= 0 && i <= 9 => singleDigitToSting(i)
         case i if i >= 10 && i <= 19 => teenDigitToSting(i - 10)
         case i => s"${tensDigitToSting(i/10)}" + (i%10 match {
-          case 0 => ""
-          case j => " " + singleDigitToSting(j)
+          case 0 => empty
+          case j => space + singleDigitToSting(j)
         })
       }
-      val spaceBetween = if (hundreds > 0 && tens > 0) " " else ""
+
+      val spaceBetween = spaceOrEmpty(hundreds > 0 && tens > 0)
+
       s"$hundredsStr$spaceBetween$tensStr"
     }
   }

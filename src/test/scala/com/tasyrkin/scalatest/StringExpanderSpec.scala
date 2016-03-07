@@ -62,6 +62,11 @@ class StringExpanderSpec extends FlatSpec with Matchers {
   }
 
   "A number string" should "be expanded into correct string" in {
+    StringExpander.expand("-9125005") should be ("minus nine millions one hundred twenty five thousands five")
+    StringExpander.expand("-5005") should be ("minus five thousands five")
+    StringExpander.expand("-200") should be ("minus two hundreds")
+    StringExpander.expand("-19") should be ("minus nineteen")
+    StringExpander.expand("-1") should be ("minus one")
     StringExpander.expand("0") should be ("zero")
     StringExpander.expand("10") should be ("ten")
     StringExpander.expand("100") should be ("one hundred")
