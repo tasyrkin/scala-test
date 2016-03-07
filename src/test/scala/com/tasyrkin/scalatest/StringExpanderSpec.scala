@@ -25,8 +25,8 @@ class StringExpanderSpec extends FlatSpec with Matchers {
     StringExpander.parseTriple(30) should be ("thirty")
     StringExpander.parseTriple(35) should be ("thirty five")
     StringExpander.parseTriple(39) should be ("thirty nine")
-    StringExpander.parseTriple(40) should be ("fourty")
-    StringExpander.parseTriple(41) should be ("fourty one")
+    StringExpander.parseTriple(40) should be ("forty")
+    StringExpander.parseTriple(41) should be ("forty one")
     StringExpander.parseTriple(50) should be ("fifty")
     StringExpander.parseTriple(53) should be ("fifty three")
     StringExpander.parseTriple(60) should be ("sixty")
@@ -59,6 +59,27 @@ class StringExpanderSpec extends FlatSpec with Matchers {
     StringExpander.parseTriple(825) should be ("eight hundreds twenty five")
     StringExpander.parseTriple(900) should be ("nine hundreds")
     StringExpander.parseTriple(999) should be ("nine hundreds ninety nine")
+  }
+
+  "A number string" should "be expanded into correct string" in {
+    StringExpander.expand("0") should be ("zero")
+    StringExpander.expand("10") should be ("ten")
+    StringExpander.expand("100") should be ("one hundred")
+    StringExpander.expand("678") should be ("six hundreds seventy eight")
+    StringExpander.expand("1000") should be ("one thousand")
+    StringExpander.expand("2000") should be ("two thousands")
+    StringExpander.expand("5555") should be ("five thousands five hundreds fifty five")
+    StringExpander.expand("15555") should be ("fifteen thousands five hundreds fifty five")
+    StringExpander.expand("124124") should be ("one hundred twenty four thousands one hundred twenty four")
+    StringExpander.expand("2124124") should be ("two millions one hundred twenty four thousands one hundred twenty four")
+    StringExpander.expand("99124124") should be ("ninety nine millions one hundred twenty four thousands one hundred twenty four")
+    StringExpander.expand("199124124") should be ("one hundred ninety nine millions one hundred twenty four thousands one hundred twenty four")
+    StringExpander.expand("1000000000") should be ("one milliard")
+    StringExpander.expand("9000000000") should be ("nine milliards")
+    StringExpander.expand("10000000000") should be ("ten milliards")
+    StringExpander.expand("1000000000000") should be ("one trillion")
+    StringExpander.expand("5000000000001") should be ("five trillions one")
+    StringExpander.expand("12345678910111213") should be ("twelve quadrillions three hundreds forty five trillions six hundreds seventy eight milliards nine hundreds ten millions one hundred eleven thousands two hundreds thirteen")
   }
 
   it should "throw IllegalArgumentException an out of range number is provided" in {
